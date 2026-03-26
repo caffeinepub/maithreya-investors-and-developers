@@ -4,6 +4,7 @@ import Footer from "../components/Footer";
 import Header from "../components/Header";
 import Hero from "../components/Hero";
 import MLMTree from "../components/MLMTree";
+import Properties from "../components/Properties";
 import Services from "../components/Services";
 
 export default function Home() {
@@ -13,6 +14,7 @@ export default function Home() {
       <main>
         <Hero />
         <Services />
+        <Properties />
         <About />
         <MLMTree />
         <Contact />

@@ -1,5 +1,6 @@
 import { Award, CheckCircle, TrendingUp, Users } from "lucide-react";
 import { motion } from "motion/react";
+import { useCompanyInfo } from "../hooks/useCompanyInfo";
 
 const values = [
   "Transparency in every transaction and report",
@@ -17,6 +18,7 @@ const milestones = [
 ];
 
 export default function About() {
+  const { info } = useCompanyInfo();
   return (
     <section id="about" className="py-24 bg-white">
       <div className="container mx-auto px-4">
@@ -37,18 +39,10 @@ export default function About() {
             <div className="w-12 h-1 bg-gold rounded-full mb-7" />
 
             <p className="text-muted-foreground leading-relaxed mb-4 text-[15px]">
-              Maithreya Investors and Developers is a leading finance and real
-              estate company dedicated to democratising wealth creation. We pool
-              capital from hundreds of investors to build professionally
-              managed, diversified portfolios — giving every individual access
-              to institutional-grade investment opportunities.
+              {info.aboutText}
             </p>
             <p className="text-muted-foreground leading-relaxed mb-8 text-[15px]">
-              Our innovative Multi-Level Marketing network empowers business
-              developers, team leaders, marketing managers and directors to grow
-              their wealth while expanding the community — creating a
-              sustainable ecosystem of financial growth and real estate
-              security.
+              {info.aboutText2}
             </p>
 
             <div className="space-y-3 mb-10">
@@ -120,9 +114,7 @@ export default function About() {
                 </h3>
               </div>
               <p className="text-muted-foreground text-[14px] leading-relaxed">
-                To make professional investment management accessible to every
-                Indian investor — regardless of wealth level — through pooled
-                funds, expert management, and transparent reporting.
+                {info.missionText}
               </p>
             </div>
 
@@ -137,9 +129,7 @@ export default function About() {
                 </h3>
               </div>
               <p className="text-muted-foreground text-[14px] leading-relaxed">
-                To become India's most trusted community-driven investment
-                platform, where every member of our network shares in the
-                prosperity of a professionally managed, diversified portfolio.
+                {info.visionText}
               </p>
             </div>
           </motion.div>

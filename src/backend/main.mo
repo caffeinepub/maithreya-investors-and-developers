@@ -5,14 +5,12 @@ import Runtime "mo:core/Runtime";
 import Nat "mo:core/Nat";
 import Array "mo:core/Array";
 import Order "mo:core/Order";
-import Principal "mo:core/Principal";
 import Text "mo:core/Text";
+import Principal "mo:core/Principal";
 
 import AccessControl "authorization/access-control";
 import MixinAuthorization "authorization/MixinAuthorization";
-import Migration "migration";
 
-(with migration = Migration.run)
 actor {
   // Types for hierarchy
   type Role = {
@@ -37,7 +35,6 @@ actor {
     joiningDate : ?Text;
   };
 
-  // Inquiry types
   type InquiryType = {
     #investment;
     #loanApplication;
@@ -61,7 +58,6 @@ actor {
     status : InquiryStatus;
   };
 
-  // Salary distribution types
   type SalaryRecord = {
     id : Text;
     memberId : Text;
@@ -147,13 +143,6 @@ actor {
     };
   };
 
-  // User profile type
-  public type UserProfile = {
-    name : Text;
-    email : Text;
-    phone : Text;
-  };
-
   type UpdateMemberInput = {
     id : Text;
     name : Text;
@@ -165,38 +154,109 @@ actor {
     joiningDate : ?Text;
   };
 
+  type CompanyInfo = {
+    companyName : Text;
+    tagline : Text;
+    about : Text;
+    mission : Text;
+    vision : Text;
+    address : Text;
+    phone1 : Text;
+    phone2 : Text;
+    email : Text;
+    established : ?Text;
+  };
+
+  public type UserProfile = {
+    name : Text;
+    email : Text;
+    phone : Text;
+  };
+
+  type Property = {
+    id : Text;
+    title : Text;
+    description : Text;
+    price : Text;
+    location : Text;
+    propertyType : Text;
+    status : Text;
+    area : ?Text;
+    bedrooms : ?Nat;
+    imageUrl : ?Text;
+    createdAt : Time.Time;
+  };
+
+  type Service = {
+    id : Text;
+    title : Text;
+    description : Text;
+    features : [Text];
+    iconName : Text;
+    order : Nat;
+  };
+
+  type AdminAccount = {
+    username : Text;
+    password : Text;
+  };
+
   // State
   let members = Map.empty<Text, Member>();
   let inquiries = Map.empty<Text, Inquiry>();
   let userProfiles = Map.empty<Principal, UserProfile>();
   var memberIdCounter = 0;
   var inquiryIdCounter = 0;
+  var propertyIdCounter = 0;
   var initialized = false;
+  var companyInfo : ?CompanyInfo = null;
 
   // Salary state
   let salaryRecords = Map.empty<Text, SalaryRecord>();
+  let properties = Map.empty<Text, Property>();
+  let services = Map.empty<Text, Service>();
+  let admins = Map.empty<Text, AdminAccount>();
 
-  // Initialize access control and mixin
+  // Initialize access control and mixin (kept for compatibility)
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
 
-  // Initialize default Managing Director
-  public shared ({ caller }) func initialize() : async () {
-    if (initialized) {
-      Runtime.trap("Already initialized");
+  // Helper function to verify admin credentials
+  func verifyAdmin(username : Text, password : Text) : Bool {
+    switch (admins.get(username)) {
+      case (null) { false };
+      case (?admin) { admin.password == password };
     };
+  };
 
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can initialize");
+  // Helper function to require admin authentication
+  func requireAdmin(username : Text, password : Text) {
+    if (not verifyAdmin(username, password)) {
+      Runtime.trap("Unauthorized: Invalid admin credentials");
     };
+  };
 
+  // Initialize default data
+  public shared func initialize() : async () {
+    if (initialized) { return };
+    
+    // Seed default admin
+    admins.add(
+      "praneeth",
+      {
+        username = "praneeth";
+        password = "bollevula55";
+      },
+    );
+
+    // Seed MD
     let mdId = "MD-1";
     let md : Member = {
       id = mdId;
       name = "B Narayana Reddy";
       role = #managingDirector;
-      email = "ceo@maithreya.com";
-      phone = "+1 555-123-4567";
+      email = "reddynarayana11@gmail.com";
+      phone = "9951597247";
       address = null;
       photoUrl = null;
       parentId = null;
@@ -206,9 +266,72 @@ actor {
     };
     members.add(mdId, md);
     memberIdCounter := 1;
+
+    // Seed default services
+    services.add(
+      "investment-pooling",
+      {
+        id = "investment-pooling";
+        title = "Investment Pooling";
+        description = "Join forces to invest in lucrative real estate projects, shares, and other assets.";
+        features = [
+          "High ROI",
+          "Diversified Portfolio",
+          "Professional Management",
+        ];
+        iconName = "cash-manage";
+        order = 1;
+      },
+    );
+    services.add(
+      "portfolio-management",
+      {
+        id = "portfolio-management";
+        title = "Portfolio Management";
+        description = "Expert curation and management of your investments in shares, bonds, and properties.";
+        features = [
+          "Risk Assessment",
+          "Performance Tracking",
+          "Optimization Strategies",
+        ];
+        iconName = "portfolio";
+        order = 2;
+      },
+    );
+    services.add(
+      "property-loans",
+      {
+        id = "property-loans";
+        title = "Property-Secured Loans";
+        description = "Quick and hassle-free loans against your property assets and gold.";
+        features = [
+          "Low Interest Rates",
+          "Flexible Repayment",
+          "Fast Approvals",
+        ];
+        iconName = "loan";
+        order = 3;
+      },
+    );
+
+    // Seed default company info
+    companyInfo := ?{
+      companyName = "Maithreya Investors and Developers";
+      tagline = "Your Trusted Partner in Finance and Real Estate";
+      about = "Leading finance and real estate company";
+      mission = "To provide exceptional investment opportunities";
+      vision = "To be the most trusted name in finance and real estate";
+      address = "Hyderabad, India";
+      phone1 = "9951597247";
+      phone2 = "";
+      email = "reddynarayana11@gmail.com";
+      established = ?"2020";
+    };
+
     initialized := true;
   };
 
+  // Helper functions for hierarchy validation
   func countChildrenByRole(parentId : Text, role : Role) : Nat {
     var count = 0;
     for ((_, member) in members.entries()) {
@@ -219,10 +342,154 @@ actor {
     count;
   };
 
-  public shared ({ caller }) func createMember(member : Member) : async Text {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can create members");
+  // Admin account management functions
+  public query func verifyAdminLogin(username : Text, password : Text) : async Bool {
+    verifyAdmin(username, password);
+  };
+
+  public shared func addAdmin(callerUsername : Text, callerPassword : Text, newUsername : Text, newPassword : Text) : async () {
+    requireAdmin(callerUsername, callerPassword);
+    
+    if (admins.get(newUsername) != null) {
+      Runtime.trap("Admin username already exists");
     };
+
+    admins.add(
+      newUsername,
+      {
+        username = newUsername;
+        password = newPassword;
+      },
+    );
+  };
+
+  public shared func changeAdminPassword(username : Text, oldPassword : Text, newPassword : Text) : async () {
+    switch (admins.get(username)) {
+      case (null) { Runtime.trap("Admin not found") };
+      case (?admin) {
+        if (admin.password != oldPassword) {
+          Runtime.trap("Old password is incorrect");
+        };
+        let updatedAdmin : AdminAccount = {
+          username = admin.username;
+          password = newPassword;
+        };
+        admins.add(username, updatedAdmin);
+      };
+    };
+  };
+
+  public shared func removeAdmin(callerUsername : Text, callerPassword : Text, targetUsername : Text) : async () {
+    requireAdmin(callerUsername, callerPassword);
+
+    // Count total admins
+    var adminCount = 0;
+    for ((_, _) in admins.entries()) {
+      adminCount += 1;
+    };
+
+    if (adminCount <= 1) {
+      Runtime.trap("Cannot remove the last admin");
+    };
+
+    if (admins.get(targetUsername) == null) {
+      Runtime.trap("Target admin not found");
+    };
+
+    admins.remove(targetUsername);
+  };
+
+  public query func listAdmins(callerUsername : Text, callerPassword : Text) : async [Text] {
+    if (not verifyAdmin(callerUsername, callerPassword)) {
+      Runtime.trap("Unauthorized: Invalid admin credentials");
+    };
+
+    let adminsList = List.empty<Text>();
+    for ((username, _) in admins.entries()) {
+      adminsList.add(username);
+    };
+    adminsList.toArray();
+  };
+
+  // Property management functions
+  public shared func addProperty(callerUsername : Text, callerPassword : Text, property : Property) : async Text {
+    requireAdmin(callerUsername, callerPassword);
+
+    propertyIdCounter += 1;
+    let newId = "PROP-" # propertyIdCounter.toText();
+
+    let newProperty : Property = {
+      id = newId;
+      title = property.title;
+      description = property.description;
+      price = property.price;
+      location = property.location;
+      propertyType = property.propertyType;
+      status = property.status;
+      area = property.area;
+      bedrooms = property.bedrooms;
+      imageUrl = property.imageUrl;
+      createdAt = Time.now();
+    };
+
+    properties.add(newId, newProperty);
+    newId;
+  };
+
+  public shared func updateProperty(callerUsername : Text, callerPassword : Text, property : Property) : async () {
+    requireAdmin(callerUsername, callerPassword);
+
+    if (properties.get(property.id) == null) {
+      Runtime.trap("Property not found");
+    };
+
+    properties.add(property.id, property);
+  };
+
+  public shared func deleteProperty(callerUsername : Text, callerPassword : Text, id : Text) : async () {
+    requireAdmin(callerUsername, callerPassword);
+
+    if (properties.get(id) == null) {
+      Runtime.trap("Property not found");
+    };
+
+    properties.remove(id);
+  };
+
+  public query func getAllProperties() : async [Property] {
+    properties.values().toArray();
+  };
+
+  // Services management functions
+  public shared func updateServices(callerUsername : Text, callerPassword : Text, newServices : [Service]) : async () {
+    requireAdmin(callerUsername, callerPassword);
+
+    // Clear existing services
+    for ((id, _) in services.entries()) {
+      services.remove(id);
+    };
+
+    // Add new services
+    for (service in newServices.values()) {
+      services.add(service.id, service);
+    };
+  };
+
+  public query func getAllServices() : async [Service] {
+    let servicesList = List.empty<Service>();
+    for ((_, svc) in services.entries()) {
+      servicesList.add(svc);
+    };
+
+    let servicesArray = servicesList.toArray();
+    servicesArray.sort(func(a : Service, b : Service) : Order.Order {
+      Nat.compare(a.order, b.order);
+    });
+  };
+
+  // Member hierarchy functions (admin-only)
+  public shared func createMember(callerUsername : Text, callerPassword : Text, member : Member) : async Text {
+    requireAdmin(callerUsername, callerPassword);
 
     switch (member.role) {
       case (#managingDirector) {
@@ -324,10 +591,9 @@ actor {
     newId;
   };
 
-  public shared ({ caller }) func updateMember(input : UpdateMemberInput) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can update members");
-    };
+  public shared func updateMember(callerUsername : Text, callerPassword : Text, input : UpdateMemberInput) : async () {
+    requireAdmin(callerUsername, callerPassword);
+
     switch (members.get(input.id)) {
       case (null) { Runtime.trap("Member not found") };
       case (?existing) {
@@ -349,35 +615,21 @@ actor {
     };
   };
 
-  public query ({ caller }) func getFullHierarchy() : async [Member] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only authenticated users can view hierarchy");
-    };
+  public query func getFullHierarchy() : async [Member] {
     let membersArray = members.values().toArray();
     membersArray.sort(MemberArray.compareByRoleAndName);
   };
 
-  public query ({ caller }) func getMember(id : Text) : async Member {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only authenticated users can view members");
-    };
-    switch (members.get(id)) {
-      case (null) { Runtime.trap("Member not found") };
-      case (?m) { m };
-    };
+  public query func getMember(id : Text) : async ?Member {
+    members.get(id);
   };
 
-  public query ({ caller }) func getChildren(parentId : Text) : async [Member] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only authenticated users can view hierarchy");
-    };
+  public query func getChildren(parentId : Text) : async [Member] {
     members.values().filter(func(m : Member) : Bool { m.parentId == ?parentId }).toArray();
   };
 
-  public shared ({ caller }) func submitInquiry(inquiry : Inquiry) : async Text {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #guest))) {
-      Runtime.trap("Unauthorized: Authentication required to submit inquiries");
-    };
+  // Inquiry functions
+  public shared func submitInquiry(inquiry : Inquiry) : async Text {
     inquiryIdCounter += 1;
     let newId = "INQ-" # inquiryIdCounter.toText();
     let newInquiry : Inquiry = {
@@ -395,10 +647,9 @@ actor {
     newId;
   };
 
-  public shared ({ caller }) func updateInquiryStatus(id : Text, status : InquiryStatus) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can update inquiry status");
-    };
+  public shared func updateInquiryStatus(callerUsername : Text, callerPassword : Text, id : Text, status : InquiryStatus) : async () {
+    requireAdmin(callerUsername, callerPassword);
+
     switch (inquiries.get(id)) {
       case (null) { Runtime.trap("Inquiry not found") };
       case (?inq) {
@@ -418,24 +669,16 @@ actor {
     };
   };
 
-  public query ({ caller }) func getAllInquiries() : async [Inquiry] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can view all inquiries");
-    };
-    inquiries.values().toArray().sort();
+  public query func getAllInquiries() : async [Inquiry] {
+    inquiries.values().toArray().sort(func(i1 : Inquiry, i2 : Inquiry) : Order.Order { Text.compare(i1.id, i2.id) });
   };
 
-  public query ({ caller }) func getInquiriesByStatus(status : InquiryStatus) : async [Inquiry] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can filter inquiries");
-    };
+  public query func getInquiriesByStatus(status : InquiryStatus) : async [Inquiry] {
     inquiries.values().filter(func(i : Inquiry) : Bool { i.status == status }).toArray();
   };
 
+  // User profile functions
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can access profiles");
-    };
     userProfiles.get(caller);
   };
 
@@ -447,18 +690,13 @@ actor {
   };
 
   public shared ({ caller }) func saveCallerUserProfile(profile : UserProfile) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can save profiles");
-    };
     userProfiles.add(caller, profile);
   };
 
   // Salary functions (admin-only)
+  public shared func setSalary(callerUsername : Text, callerPassword : Text, input : SalaryInput) : async Text {
+    requireAdmin(callerUsername, callerPassword);
 
-  public shared ({ caller }) func setSalary(input : SalaryInput) : async Text {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Only admins can set salaries");
-    };
     switch (members.get(input.memberId)) {
       case (null) { Runtime.trap("Member not found") };
       case (?member) {
@@ -480,10 +718,9 @@ actor {
     };
   };
 
-  public shared ({ caller }) func distributeSalaries(input : SalaryDistributionInput) : async [Text] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Only admins can distribute salaries");
-    };
+  public shared func distributeSalaries(callerUsername : Text, callerPassword : Text, input : SalaryDistributionInput) : async [Text] {
+    requireAdmin(callerUsername, callerPassword);
+
     let resultsList = List.empty<Text>();
     for (entry in input.entries.values()) {
       switch (members.get(entry.memberId)) {
@@ -509,24 +746,26 @@ actor {
     resultsList.toArray();
   };
 
-  public query ({ caller }) func getSalaryRecords(memberId : Text) : async [SalaryRecord] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Only admins can view salary records");
-    };
-    salaryRecords.values().filter(func(r) { r.memberId == memberId }).toArray();
+  public query func getSalaryRecords(memberId : Text) : async [SalaryRecord] {
+    salaryRecords.values().filter(func(r : SalaryRecord) : Bool { r.memberId == memberId }).toArray();
   };
 
-  public query ({ caller }) func getAllSalaryRecords() : async [SalaryRecord] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Only admins can view salary records");
-    };
+  public query func getAllSalaryRecords() : async [SalaryRecord] {
     salaryRecords.values().toArray().sort(SalaryRecordArray.compareByDistributedAt);
   };
 
-  public query ({ caller }) func getSalaryByMonthYear(month : Nat, year : Nat) : async [SalaryRecord] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Only admins can view salary records");
-    };
-    salaryRecords.values().filter(func(r) { r.month == month and r.year == year }).toArray().sort(SalaryRecordArray.compareByAmount);
+  public query func getSalaryByMonthYear(month : Nat, year : Nat) : async [SalaryRecord] {
+    salaryRecords.values().filter(func(r : SalaryRecord) : Bool { r.month == month and r.year == year })
+      .toArray().sort(SalaryRecordArray.compareByAmount);
+  };
+
+  // Company info functions
+  public query func getCompanyInfo() : async ?CompanyInfo {
+    companyInfo;
+  };
+
+  public shared func updateCompanyInfo(callerUsername : Text, callerPassword : Text, info : CompanyInfo) : async () {
+    requireAdmin(callerUsername, callerPassword);
+    companyInfo := ?info;
   };
 };

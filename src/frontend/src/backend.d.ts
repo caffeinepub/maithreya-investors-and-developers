@@ -21,12 +21,12 @@ export interface SalaryRecord {
 export interface UpdateMemberInput {
     id: string;
     name: string;
+    designation?: string;
+    joiningDate?: string;
     photoUrl?: string;
     email: string;
     address?: string;
     phone: string;
-    designation?: string;
-    joiningDate?: string;
 }
 export type Time = bigint;
 export interface SalaryDistributionInput {
@@ -38,18 +38,51 @@ export interface SalaryDistributionInput {
         amount: bigint;
     }>;
 }
+export interface CompanyInfo {
+    about: string;
+    mission: string;
+    tagline: string;
+    established?: string;
+    email: string;
+    address: string;
+    companyName: string;
+    vision: string;
+    phone1: string;
+    phone2: string;
+}
+export interface Service {
+    id: string;
+    title: string;
+    features: Array<string>;
+    order: bigint;
+    description: string;
+    iconName: string;
+}
+export interface Property {
+    id: string;
+    status: string;
+    title: string;
+    propertyType: string;
+    bedrooms?: bigint;
+    area?: string;
+    createdAt: Time;
+    description: string;
+    imageUrl?: string;
+    price: string;
+    location: string;
+}
 export interface Member {
     id: string;
     name: string;
+    designation?: string;
     createdAt: Time;
     role: Role;
+    joiningDate?: string;
     photoUrl?: string;
     email: string;
     address?: string;
     phone: string;
     parentId?: string;
-    designation?: string;
-    joiningDate?: string;
 }
 export interface Inquiry {
     id: string;
@@ -96,25 +129,38 @@ export enum UserRole {
     guest = "guest"
 }
 export interface backendInterface {
+    addAdmin(callerUsername: string, callerPassword: string, newUsername: string, newPassword: string): Promise<void>;
+    addProperty(callerUsername: string, callerPassword: string, property: Property): Promise<string>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
-    createMember(member: Member): Promise<string>;
-    distributeSalaries(input: SalaryDistributionInput): Promise<Array<string>>;
+    changeAdminPassword(username: string, oldPassword: string, newPassword: string): Promise<void>;
+    createMember(callerUsername: string, callerPassword: string, member: Member): Promise<string>;
+    deleteProperty(callerUsername: string, callerPassword: string, id: string): Promise<void>;
+    distributeSalaries(callerUsername: string, callerPassword: string, input: SalaryDistributionInput): Promise<Array<string>>;
     getAllInquiries(): Promise<Array<Inquiry>>;
+    getAllProperties(): Promise<Array<Property>>;
     getAllSalaryRecords(): Promise<Array<SalaryRecord>>;
+    getAllServices(): Promise<Array<Service>>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getChildren(parentId: string): Promise<Array<Member>>;
+    getCompanyInfo(): Promise<CompanyInfo | null>;
     getFullHierarchy(): Promise<Array<Member>>;
     getInquiriesByStatus(status: InquiryStatus): Promise<Array<Inquiry>>;
-    getMember(id: string): Promise<Member>;
+    getMember(id: string): Promise<Member | null>;
     getSalaryByMonthYear(month: bigint, year: bigint): Promise<Array<SalaryRecord>>;
     getSalaryRecords(memberId: string): Promise<Array<SalaryRecord>>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     initialize(): Promise<void>;
     isCallerAdmin(): Promise<boolean>;
+    listAdmins(callerUsername: string, callerPassword: string): Promise<Array<string>>;
+    removeAdmin(callerUsername: string, callerPassword: string, targetUsername: string): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
-    setSalary(input: SalaryInput): Promise<string>;
+    setSalary(callerUsername: string, callerPassword: string, input: SalaryInput): Promise<string>;
     submitInquiry(inquiry: Inquiry): Promise<string>;
-    updateInquiryStatus(id: string, status: InquiryStatus): Promise<void>;
-    updateMember(input: UpdateMemberInput): Promise<void>;
+    updateCompanyInfo(callerUsername: string, callerPassword: string, info: CompanyInfo): Promise<void>;
+    updateInquiryStatus(callerUsername: string, callerPassword: string, id: string, status: InquiryStatus): Promise<void>;
+    updateMember(callerUsername: string, callerPassword: string, input: UpdateMemberInput): Promise<void>;
+    updateProperty(callerUsername: string, callerPassword: string, property: Property): Promise<void>;
+    updateServices(callerUsername: string, callerPassword: string, newServices: Array<Service>): Promise<void>;
+    verifyAdminLogin(username: string, password: string): Promise<boolean>;
 }

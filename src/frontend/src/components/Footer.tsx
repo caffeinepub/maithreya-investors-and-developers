@@ -6,6 +6,7 @@ import { useState } from "react";
 import { SiFacebook, SiInstagram, SiLinkedin, SiX } from "react-icons/si";
 import { toast } from "sonner";
 import { InquiryStatus, InquiryType } from "../backend.d";
+import { useCompanyInfo } from "../hooks/useCompanyInfo";
 import { useSubmitInquiry } from "../hooks/useQueries";
 
 function generateId() {
@@ -23,6 +24,7 @@ const quickLinks = [
 
 export default function Footer() {
   const { mutateAsync, isPending } = useSubmitInquiry();
+  const { info } = useCompanyInfo();
   const [form, setForm] = useState({ name: "", email: "", message: "" });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -82,12 +84,12 @@ export default function Footer() {
             {/* Contact info */}
             <ul className="space-y-3 mb-7">
               {[
+                { Icon: MapPin, text: info.address },
                 {
-                  Icon: MapPin,
-                  text: "123 Business Avenue, Financial District, Hyderabad",
+                  Icon: Phone,
+                  text: `+91 ${info.phone1}${info.phone2 ? ` / ${info.phone2}` : ""}`,
                 },
-                { Icon: Phone, text: "+91 98765 43210" },
-                { Icon: Mail, text: "info@maithreyainvestors.com" },
+                { Icon: Mail, text: info.email },
               ].map(({ Icon, text }) => (
                 <li
                   key={text}

@@ -8,12 +8,25 @@
 
 import { IDL } from '@icp-sdk/core/candid';
 
+export const Time = IDL.Int;
+export const Property = IDL.Record({
+  'id' : IDL.Text,
+  'status' : IDL.Text,
+  'title' : IDL.Text,
+  'propertyType' : IDL.Text,
+  'bedrooms' : IDL.Opt(IDL.Nat),
+  'area' : IDL.Opt(IDL.Text),
+  'createdAt' : Time,
+  'description' : IDL.Text,
+  'imageUrl' : IDL.Opt(IDL.Text),
+  'price' : IDL.Text,
+  'location' : IDL.Text,
+});
 export const UserRole = IDL.Variant({
   'admin' : IDL.Null,
   'user' : IDL.Null,
   'guest' : IDL.Null,
 });
-export const Time = IDL.Int;
 export const Role = IDL.Variant({
   'managingDirector' : IDL.Null,
   'director' : IDL.Null,
@@ -24,8 +37,10 @@ export const Role = IDL.Variant({
 export const Member = IDL.Record({
   'id' : IDL.Text,
   'name' : IDL.Text,
+  'designation' : IDL.Opt(IDL.Text),
   'createdAt' : Time,
   'role' : Role,
+  'joiningDate' : IDL.Opt(IDL.Text),
   'photoUrl' : IDL.Opt(IDL.Text),
   'email' : IDL.Text,
   'address' : IDL.Opt(IDL.Text),
@@ -74,10 +89,30 @@ export const SalaryRecord = IDL.Record({
   'notes' : IDL.Opt(IDL.Text),
   'amount' : IDL.Nat,
 });
+export const Service = IDL.Record({
+  'id' : IDL.Text,
+  'title' : IDL.Text,
+  'features' : IDL.Vec(IDL.Text),
+  'order' : IDL.Nat,
+  'description' : IDL.Text,
+  'iconName' : IDL.Text,
+});
 export const UserProfile = IDL.Record({
   'name' : IDL.Text,
   'email' : IDL.Text,
   'phone' : IDL.Text,
+});
+export const CompanyInfo = IDL.Record({
+  'about' : IDL.Text,
+  'mission' : IDL.Text,
+  'tagline' : IDL.Text,
+  'established' : IDL.Opt(IDL.Text),
+  'email' : IDL.Text,
+  'address' : IDL.Text,
+  'companyName' : IDL.Text,
+  'vision' : IDL.Text,
+  'phone1' : IDL.Text,
+  'phone2' : IDL.Text,
 });
 export const SalaryInput = IDL.Record({
   'memberId' : IDL.Text,
@@ -89,6 +124,8 @@ export const SalaryInput = IDL.Record({
 export const UpdateMemberInput = IDL.Record({
   'id' : IDL.Text,
   'name' : IDL.Text,
+  'designation' : IDL.Opt(IDL.Text),
+  'joiningDate' : IDL.Opt(IDL.Text),
   'photoUrl' : IDL.Opt(IDL.Text),
   'email' : IDL.Text,
   'address' : IDL.Opt(IDL.Text),
@@ -97,25 +134,32 @@ export const UpdateMemberInput = IDL.Record({
 
 export const idlService = IDL.Service({
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
+  'addAdmin' : IDL.Func([IDL.Text, IDL.Text, IDL.Text, IDL.Text], [], []),
+  'addProperty' : IDL.Func([IDL.Text, IDL.Text, Property], [IDL.Text], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
-  'createMember' : IDL.Func([Member], [IDL.Text], []),
+  'changeAdminPassword' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [], []),
+  'createMember' : IDL.Func([IDL.Text, IDL.Text, Member], [IDL.Text], []),
+  'deleteProperty' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [], []),
   'distributeSalaries' : IDL.Func(
-      [SalaryDistributionInput],
+      [IDL.Text, IDL.Text, SalaryDistributionInput],
       [IDL.Vec(IDL.Text)],
       [],
     ),
   'getAllInquiries' : IDL.Func([], [IDL.Vec(Inquiry)], ['query']),
+  'getAllProperties' : IDL.Func([], [IDL.Vec(Property)], ['query']),
   'getAllSalaryRecords' : IDL.Func([], [IDL.Vec(SalaryRecord)], ['query']),
+  'getAllServices' : IDL.Func([], [IDL.Vec(Service)], ['query']),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
   'getChildren' : IDL.Func([IDL.Text], [IDL.Vec(Member)], ['query']),
+  'getCompanyInfo' : IDL.Func([], [IDL.Opt(CompanyInfo)], ['query']),
   'getFullHierarchy' : IDL.Func([], [IDL.Vec(Member)], ['query']),
   'getInquiriesByStatus' : IDL.Func(
       [InquiryStatus],
       [IDL.Vec(Inquiry)],
       ['query'],
     ),
-  'getMember' : IDL.Func([IDL.Text], [Member], ['query']),
+  'getMember' : IDL.Func([IDL.Text], [IDL.Opt(Member)], ['query']),
   'getSalaryByMonthYear' : IDL.Func(
       [IDL.Nat, IDL.Nat],
       [IDL.Vec(SalaryRecord)],
@@ -129,22 +173,45 @@ export const idlService = IDL.Service({
     ),
   'initialize' : IDL.Func([], [], []),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+  'listAdmins' : IDL.Func([IDL.Text, IDL.Text], [IDL.Vec(IDL.Text)], ['query']),
+  'removeAdmin' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [], []),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
-  'setSalary' : IDL.Func([SalaryInput], [IDL.Text], []),
+  'setSalary' : IDL.Func([IDL.Text, IDL.Text, SalaryInput], [IDL.Text], []),
   'submitInquiry' : IDL.Func([Inquiry], [IDL.Text], []),
-  'updateInquiryStatus' : IDL.Func([IDL.Text, InquiryStatus], [], []),
-  'updateMember' : IDL.Func([UpdateMemberInput], [], []),
+  'updateCompanyInfo' : IDL.Func([IDL.Text, IDL.Text, CompanyInfo], [], []),
+  'updateInquiryStatus' : IDL.Func(
+      [IDL.Text, IDL.Text, IDL.Text, InquiryStatus],
+      [],
+      [],
+    ),
+  'updateMember' : IDL.Func([IDL.Text, IDL.Text, UpdateMemberInput], [], []),
+  'updateProperty' : IDL.Func([IDL.Text, IDL.Text, Property], [], []),
+  'updateServices' : IDL.Func([IDL.Text, IDL.Text, IDL.Vec(Service)], [], []),
+  'verifyAdminLogin' : IDL.Func([IDL.Text, IDL.Text], [IDL.Bool], ['query']),
 });
 
 export const idlInitArgs = [];
 
 export const idlFactory = ({ IDL }) => {
+  const Time = IDL.Int;
+  const Property = IDL.Record({
+    'id' : IDL.Text,
+    'status' : IDL.Text,
+    'title' : IDL.Text,
+    'propertyType' : IDL.Text,
+    'bedrooms' : IDL.Opt(IDL.Nat),
+    'area' : IDL.Opt(IDL.Text),
+    'createdAt' : Time,
+    'description' : IDL.Text,
+    'imageUrl' : IDL.Opt(IDL.Text),
+    'price' : IDL.Text,
+    'location' : IDL.Text,
+  });
   const UserRole = IDL.Variant({
     'admin' : IDL.Null,
     'user' : IDL.Null,
     'guest' : IDL.Null,
   });
-  const Time = IDL.Int;
   const Role = IDL.Variant({
     'managingDirector' : IDL.Null,
     'director' : IDL.Null,
@@ -155,8 +222,10 @@ export const idlFactory = ({ IDL }) => {
   const Member = IDL.Record({
     'id' : IDL.Text,
     'name' : IDL.Text,
+    'designation' : IDL.Opt(IDL.Text),
     'createdAt' : Time,
     'role' : Role,
+    'joiningDate' : IDL.Opt(IDL.Text),
     'photoUrl' : IDL.Opt(IDL.Text),
     'email' : IDL.Text,
     'address' : IDL.Opt(IDL.Text),
@@ -205,10 +274,30 @@ export const idlFactory = ({ IDL }) => {
     'notes' : IDL.Opt(IDL.Text),
     'amount' : IDL.Nat,
   });
+  const Service = IDL.Record({
+    'id' : IDL.Text,
+    'title' : IDL.Text,
+    'features' : IDL.Vec(IDL.Text),
+    'order' : IDL.Nat,
+    'description' : IDL.Text,
+    'iconName' : IDL.Text,
+  });
   const UserProfile = IDL.Record({
     'name' : IDL.Text,
     'email' : IDL.Text,
     'phone' : IDL.Text,
+  });
+  const CompanyInfo = IDL.Record({
+    'about' : IDL.Text,
+    'mission' : IDL.Text,
+    'tagline' : IDL.Text,
+    'established' : IDL.Opt(IDL.Text),
+    'email' : IDL.Text,
+    'address' : IDL.Text,
+    'companyName' : IDL.Text,
+    'vision' : IDL.Text,
+    'phone1' : IDL.Text,
+    'phone2' : IDL.Text,
   });
   const SalaryInput = IDL.Record({
     'memberId' : IDL.Text,
@@ -220,6 +309,8 @@ export const idlFactory = ({ IDL }) => {
   const UpdateMemberInput = IDL.Record({
     'id' : IDL.Text,
     'name' : IDL.Text,
+    'designation' : IDL.Opt(IDL.Text),
+    'joiningDate' : IDL.Opt(IDL.Text),
     'photoUrl' : IDL.Opt(IDL.Text),
     'email' : IDL.Text,
     'address' : IDL.Opt(IDL.Text),
@@ -228,25 +319,32 @@ export const idlFactory = ({ IDL }) => {
   
   return IDL.Service({
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
+    'addAdmin' : IDL.Func([IDL.Text, IDL.Text, IDL.Text, IDL.Text], [], []),
+    'addProperty' : IDL.Func([IDL.Text, IDL.Text, Property], [IDL.Text], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
-    'createMember' : IDL.Func([Member], [IDL.Text], []),
+    'changeAdminPassword' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [], []),
+    'createMember' : IDL.Func([IDL.Text, IDL.Text, Member], [IDL.Text], []),
+    'deleteProperty' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [], []),
     'distributeSalaries' : IDL.Func(
-        [SalaryDistributionInput],
+        [IDL.Text, IDL.Text, SalaryDistributionInput],
         [IDL.Vec(IDL.Text)],
         [],
       ),
     'getAllInquiries' : IDL.Func([], [IDL.Vec(Inquiry)], ['query']),
+    'getAllProperties' : IDL.Func([], [IDL.Vec(Property)], ['query']),
     'getAllSalaryRecords' : IDL.Func([], [IDL.Vec(SalaryRecord)], ['query']),
+    'getAllServices' : IDL.Func([], [IDL.Vec(Service)], ['query']),
     'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
     'getChildren' : IDL.Func([IDL.Text], [IDL.Vec(Member)], ['query']),
+    'getCompanyInfo' : IDL.Func([], [IDL.Opt(CompanyInfo)], ['query']),
     'getFullHierarchy' : IDL.Func([], [IDL.Vec(Member)], ['query']),
     'getInquiriesByStatus' : IDL.Func(
         [InquiryStatus],
         [IDL.Vec(Inquiry)],
         ['query'],
       ),
-    'getMember' : IDL.Func([IDL.Text], [Member], ['query']),
+    'getMember' : IDL.Func([IDL.Text], [IDL.Opt(Member)], ['query']),
     'getSalaryByMonthYear' : IDL.Func(
         [IDL.Nat, IDL.Nat],
         [IDL.Vec(SalaryRecord)],
@@ -264,11 +362,25 @@ export const idlFactory = ({ IDL }) => {
       ),
     'initialize' : IDL.Func([], [], []),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+    'listAdmins' : IDL.Func(
+        [IDL.Text, IDL.Text],
+        [IDL.Vec(IDL.Text)],
+        ['query'],
+      ),
+    'removeAdmin' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [], []),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
-    'setSalary' : IDL.Func([SalaryInput], [IDL.Text], []),
+    'setSalary' : IDL.Func([IDL.Text, IDL.Text, SalaryInput], [IDL.Text], []),
     'submitInquiry' : IDL.Func([Inquiry], [IDL.Text], []),
-    'updateInquiryStatus' : IDL.Func([IDL.Text, InquiryStatus], [], []),
-    'updateMember' : IDL.Func([UpdateMemberInput], [], []),
+    'updateCompanyInfo' : IDL.Func([IDL.Text, IDL.Text, CompanyInfo], [], []),
+    'updateInquiryStatus' : IDL.Func(
+        [IDL.Text, IDL.Text, IDL.Text, InquiryStatus],
+        [],
+        [],
+      ),
+    'updateMember' : IDL.Func([IDL.Text, IDL.Text, UpdateMemberInput], [], []),
+    'updateProperty' : IDL.Func([IDL.Text, IDL.Text, Property], [], []),
+    'updateServices' : IDL.Func([IDL.Text, IDL.Text, IDL.Vec(Service)], [], []),
+    'verifyAdminLogin' : IDL.Func([IDL.Text, IDL.Text], [IDL.Bool], ['query']),
   });
 };
 

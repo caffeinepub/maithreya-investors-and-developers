@@ -122,6 +122,15 @@ export default function Header() {
                   {link.label}
                 </a>
               ))}
+              <Link
+                to="/admin"
+                className="text-gold/80 hover:text-gold py-2.5 border-b border-white/8 text-sm font-medium transition-colors flex items-center gap-2"
+                onClick={() => setMobileOpen(false)}
+                data-ocid="nav.link"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-gold inline-block" />
+                Admin
+              </Link>
               <div className="pt-3">
                 <Button
                   className="w-full bg-gold text-navy font-bold h-11 rounded-md shadow-gold"

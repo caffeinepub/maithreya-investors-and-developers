@@ -10,6 +10,18 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
+export interface CompanyInfo {
+  'about' : string,
+  'mission' : string,
+  'tagline' : string,
+  'established' : [] | [string],
+  'email' : string,
+  'address' : string,
+  'companyName' : string,
+  'vision' : string,
+  'phone1' : string,
+  'phone2' : string,
+}
 export interface Inquiry {
   'id' : string,
   'status' : InquiryStatus,
@@ -29,13 +41,28 @@ export type InquiryType = { 'investment' : null } |
 export interface Member {
   'id' : string,
   'name' : string,
+  'designation' : [] | [string],
   'createdAt' : Time,
   'role' : Role,
+  'joiningDate' : [] | [string],
   'photoUrl' : [] | [string],
   'email' : string,
   'address' : [] | [string],
   'phone' : string,
   'parentId' : [] | [string],
+}
+export interface Property {
+  'id' : string,
+  'status' : string,
+  'title' : string,
+  'propertyType' : string,
+  'bedrooms' : [] | [bigint],
+  'area' : [] | [string],
+  'createdAt' : Time,
+  'description' : string,
+  'imageUrl' : [] | [string],
+  'price' : string,
+  'location' : string,
 }
 export type Role = { 'managingDirector' : null } |
   { 'director' : null } |
@@ -67,10 +94,20 @@ export interface SalaryRecord {
   'notes' : [] | [string],
   'amount' : bigint,
 }
+export interface Service {
+  'id' : string,
+  'title' : string,
+  'features' : Array<string>,
+  'order' : bigint,
+  'description' : string,
+  'iconName' : string,
+}
 export type Time = bigint;
 export interface UpdateMemberInput {
   'id' : string,
   'name' : string,
+  'designation' : [] | [string],
+  'joiningDate' : [] | [string],
   'photoUrl' : [] | [string],
   'email' : string,
   'address' : [] | [string],
@@ -86,27 +123,46 @@ export type UserRole = { 'admin' : null } |
   { 'guest' : null };
 export interface _SERVICE {
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
+  'addAdmin' : ActorMethod<[string, string, string, string], undefined>,
+  'addProperty' : ActorMethod<[string, string, Property], string>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
-  'createMember' : ActorMethod<[Member], string>,
-  'distributeSalaries' : ActorMethod<[SalaryDistributionInput], Array<string>>,
+  'changeAdminPassword' : ActorMethod<[string, string, string], undefined>,
+  'createMember' : ActorMethod<[string, string, Member], string>,
+  'deleteProperty' : ActorMethod<[string, string, string], undefined>,
+  'distributeSalaries' : ActorMethod<
+    [string, string, SalaryDistributionInput],
+    Array<string>
+  >,
   'getAllInquiries' : ActorMethod<[], Array<Inquiry>>,
+  'getAllProperties' : ActorMethod<[], Array<Property>>,
   'getAllSalaryRecords' : ActorMethod<[], Array<SalaryRecord>>,
+  'getAllServices' : ActorMethod<[], Array<Service>>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getChildren' : ActorMethod<[string], Array<Member>>,
+  'getCompanyInfo' : ActorMethod<[], [] | [CompanyInfo]>,
   'getFullHierarchy' : ActorMethod<[], Array<Member>>,
   'getInquiriesByStatus' : ActorMethod<[InquiryStatus], Array<Inquiry>>,
-  'getMember' : ActorMethod<[string], Member>,
+  'getMember' : ActorMethod<[string], [] | [Member]>,
   'getSalaryByMonthYear' : ActorMethod<[bigint, bigint], Array<SalaryRecord>>,
   'getSalaryRecords' : ActorMethod<[string], Array<SalaryRecord>>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'initialize' : ActorMethod<[], undefined>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
+  'listAdmins' : ActorMethod<[string, string], Array<string>>,
+  'removeAdmin' : ActorMethod<[string, string, string], undefined>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
-  'setSalary' : ActorMethod<[SalaryInput], string>,
+  'setSalary' : ActorMethod<[string, string, SalaryInput], string>,
   'submitInquiry' : ActorMethod<[Inquiry], string>,
-  'updateInquiryStatus' : ActorMethod<[string, InquiryStatus], undefined>,
-  'updateMember' : ActorMethod<[UpdateMemberInput], undefined>,
+  'updateCompanyInfo' : ActorMethod<[string, string, CompanyInfo], undefined>,
+  'updateInquiryStatus' : ActorMethod<
+    [string, string, string, InquiryStatus],
+    undefined
+  >,
+  'updateMember' : ActorMethod<[string, string, UpdateMemberInput], undefined>,
+  'updateProperty' : ActorMethod<[string, string, Property], undefined>,
+  'updateServices' : ActorMethod<[string, string, Array<Service>], undefined>,
+  'verifyAdminLogin' : ActorMethod<[string, string], boolean>,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];
