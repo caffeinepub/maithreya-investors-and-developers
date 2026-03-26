@@ -1,0 +1,119 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: "Inter";
+  src: url("/assets/fonts/Inter.woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Playfair Display";
+  src: url("/assets/fonts/PlayfairDisplay.woff2") format("woff2");
+  font-weight: 400 800;
+  font-display: swap;
+}
+
+@layer base {
+  :root {
+    --radius: 0.5rem;
+
+    /* ── Brand palette ── */
+    /* Navy  #0B1F3B → oklch(0.215 0.058 243) */
+    --navy: 0.215 0.058 243;
+    /* Navy dark   #071529 → oklch(0.16 0.05 245) */
+    --navy-dark: 0.16 0.05 245;
+    /* Navy mid    #122B50 → oklch(0.27 0.065 243) */
+    --navy-mid: 0.27 0.065 243;
+    /* Gold  #C9A24A → oklch(0.72  0.115 76) */
+    --gold: 0.72 0.115 76;
+    /* Gold light  #E4C880 → oklch(0.84  0.10  80) */
+    --gold-light: 0.84 0.1 80;
+    /* Section bg  #EEF2F5 → oklch(0.955 0.008 240) */
+    --section-bg: 0.955 0.008 240;
+
+    /* ── Semantic tokens ── */
+    --background: 1 0 0;
+    --foreground: 0.17 0.02 260;
+    --card: 1 0 0;
+    --card-foreground: 0.17 0.02 260;
+    --popover: 1 0 0;
+    --popover-foreground: 0.17 0.02 260;
+    --primary: 0.215 0.058 243;
+    --primary-foreground: 1 0 0;
+    --secondary: 0.72 0.115 76;
+    --secondary-foreground: 0.17 0.02 260;
+    --muted: 0.955 0.008 240;
+    --muted-foreground: 0.52 0.018 265;
+    --accent: 0.72 0.115 76;
+    --accent-foreground: 0.17 0.02 260;
+    --destructive: 0.577 0.245 27.325;
+    --destructive-foreground: 0.985 0 0;
+    --border: 0.88 0.008 240;
+    --input: 0.88 0.008 240;
+    --ring: 0.72 0.115 76;
+    --chart-1: 0.646 0.222 41.116;
+    --chart-2: 0.6 0.118 184.704;
+    --chart-3: 0.398 0.07 227.392;
+    --chart-4: 0.828 0.189 84.429;
+    --chart-5: 0.769 0.188 70.08;
+    --sidebar: 0.215 0.058 243;
+    --sidebar-foreground: 1 0 0;
+    --sidebar-primary: 0.72 0.115 76;
+    --sidebar-primary-foreground: 0.17 0.02 260;
+    --sidebar-accent: 0.27 0.065 243;
+    --sidebar-accent-foreground: 1 0 0;
+    --sidebar-border: 0.3 0.058 243;
+    --sidebar-ring: 0.72 0.115 76;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: "Inter", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer utilities {
+  /* Subtle dot-grid texture for hero backgrounds */
+  .dot-grid {
+    background-image: radial-gradient(
+      circle,
+      oklch(0.215 0.058 243 / 0.07) 1.5px,
+      transparent 1.5px
+    );
+    background-size: 28px 28px;
+  }
+
+  /* Gold shimmer text */
+  .text-gold-gradient {
+    background: linear-gradient(
+      135deg,
+      oklch(0.72 0.115 76) 0%,
+      oklch(0.84 0.1 80) 50%,
+      oklch(0.72 0.115 76) 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Card hover lift */
+  .card-lift {
+    @apply transition-all duration-300;
+    &:hover {
+      @apply -translate-y-1.5 shadow-xl;
+    }
+  }
+}
