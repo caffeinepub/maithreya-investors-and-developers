@@ -68,6 +68,14 @@ export default function Header() {
               <span className="absolute bottom-1 left-3 right-3 h-px bg-gold scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
             </a>
           ))}
+          <Link
+            to="/admin"
+            className="relative px-3 py-2 text-[13px] text-gold/80 hover:text-gold font-medium tracking-wide transition-colors group"
+            data-ocid="nav.link"
+          >
+            Admin
+            <span className="absolute bottom-1 left-3 right-3 h-px bg-gold scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
+          </Link>
         </nav>
 
         {/* Actions */}
@@ -80,15 +88,6 @@ export default function Header() {
               Get Started
             </Button>
           </a>
-          <Link to="/admin" className="hidden sm:block">
-            <Button
-              variant="outline"
-              className="h-9 px-4 border-white/20 text-white/70 hover:border-gold/60 hover:text-gold text-sm rounded-md transition-all"
-              data-ocid="nav.link"
-            >
-              Admin
-            </Button>
-          </Link>
           <button
             type="button"
             className="lg:hidden w-9 h-9 flex items-center justify-center rounded-md text-white/80 hover:text-white hover:bg-white/10 transition-colors"
