@@ -1809,7 +1809,7 @@ function AdminSettingsTab({ adminUser }: { adminUser: string }) {
                     size="sm"
                     className="h-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                     onClick={() => handleRemoveAdmin(username)}
-                    disabled={removingAdmin || admins.length <= 1}
+                    disabled={removingAdmin}
                     data-ocid="settings.delete_button"
                   >
                     <Trash2 size={14} className="mr-1" /> Remove

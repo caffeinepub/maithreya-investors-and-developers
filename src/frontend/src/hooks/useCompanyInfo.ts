@@ -1,4 +1,4 @@
-const STORAGE_KEY = "maithreya_company_info";
+import { useGetCompanyInfo } from "./useQueries";
 
 export interface CompanyInfo {
   address: string;
@@ -26,26 +26,21 @@ const defaults: CompanyInfo = {
     "To become India's most trusted community-driven investment platform, where every member of our network shares in the prosperity of a professionally managed, diversified portfolio.",
 };
 
-function loadInfo(): CompanyInfo {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      return { ...defaults, ...JSON.parse(stored) };
-    }
-  } catch {
-    // ignore
-  }
-  return { ...defaults };
-}
-
 export function useCompanyInfo() {
-  const info = loadInfo();
+  const { data } = useGetCompanyInfo();
 
-  const saveInfo = (updates: Partial<CompanyInfo>) => {
-    const current = loadInfo();
-    const next = { ...current, ...updates };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-  };
+  const backendInfo = data
+    ? {
+        address: data.address || defaults.address,
+        phone1: data.phone1 || defaults.phone1,
+        phone2: data.phone2 || defaults.phone2,
+        email: data.email || defaults.email,
+        aboutText: data.about || defaults.aboutText,
+        aboutText2: defaults.aboutText2,
+        missionText: data.mission || defaults.missionText,
+        visionText: data.vision || defaults.visionText,
+      }
+    : defaults;
 
-  return { info, saveInfo };
+  return { info: backendInfo };
 }

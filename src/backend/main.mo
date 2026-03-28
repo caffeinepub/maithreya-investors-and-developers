@@ -393,12 +393,18 @@ actor {
       adminCount += 1;
     };
 
-    if (adminCount <= 1) {
+    if (adminCount < 1) {
       Runtime.trap("Cannot remove the last admin");
     };
 
+    // If target is the master admin and not in stored map, nothing to remove
     if (admins.get(targetUsername) == null) {
-      Runtime.trap("Target admin not found");
+      // For master admin (praneeth), this is a no-op since it's hardcoded
+      // For other admins, this is an error
+      if (targetUsername != "praneeth") {
+        Runtime.trap("Target admin not found");
+      };
+      return;
     };
 
     admins.remove(targetUsername);
@@ -410,8 +416,14 @@ actor {
     };
 
     let adminsList = List.empty<Text>();
+    // Always include master admin if not in stored map
+    var hasPraneeth = false;
     for ((username, _) in admins.entries()) {
       adminsList.add(username);
+      if (username == "praneeth") { hasPraneeth := true };
+    };
+    if (not hasPraneeth) {
+      adminsList.add("praneeth");
     };
     adminsList.toArray();
   };
